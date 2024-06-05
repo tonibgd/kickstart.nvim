@@ -257,6 +257,15 @@ rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added via a link or github org/name. To run setup automatically, use `opts = {}`
   { 'NMAC427/guess-indent.nvim', opts = {} },
+  { 'easymotion/vim-easymotion', opts = {}, config = function() end },
+  { 'mfussenegger/nvim-dap', opts = {}, config = function() end },
+  { 'lewis6991/gitsigns.nvim', opts = {} },
+  -- rust
+  { 'simrat39/rust-tools.nvim', opts = {}, config = function() end },
+  {
+    'rust-lang/rust.vim',
+    config = function() vim.g.rustfmt_autosave = 1 end,
+  },
 
   -- Alternatively, use `config = function() ... end` for full control over the configuration.
   -- If you prefer to call `setup` explicitly, use:
@@ -273,21 +282,6 @@ require('lazy').setup({
   -- options to `gitsigns.nvim`.
   --
   -- See `:help gitsigns` to understand what the configuration keys do
-  { -- Adds git related signs to the gutter, as well as utilities for managing changes
-    'lewis6991/gitsigns.nvim',
-    ---@module 'gitsigns'
-    ---@type Gitsigns.Config
-    ---@diagnostic disable-next-line: missing-fields
-    opts = {
-      signs = {
-        add = { text = '+' }, ---@diagnostic disable-line: missing-fields
-        change = { text = '~' }, ---@diagnostic disable-line: missing-fields
-        delete = { text = '_' }, ---@diagnostic disable-line: missing-fields
-        topdelete = { text = '‾' }, ---@diagnostic disable-line: missing-fields
-        changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
-      },
-    },
-  },
 
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
@@ -599,11 +593,27 @@ require('lazy').setup({
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
       --  See `:help lsp-config` for information about keys and how to configure
       ---@type table<string, vim.lsp.Config>
+      local arduino_config = require('lspconfig.configs.arduino_language_server').default_config
+      arduino_config.cmd = {
+        'arduino-language-server',
+        '-clangd',
+        'clangd',
+        '-cli',
+        '/home/toni/bin/arduino-cli',
+        '-cli-config',
+        '/home/toni/.arduino15/arduino-cli.yaml',
+        '-fqbn',
+        'arduino:avr:uno',
+        '-log',
+        '-logpath',
+        '/home/toni/arduino-logs/',
+      }
       local servers = {
         -- clangd = {},
+        -- arduino_language_server = arduino_config,
         -- gopls = {},
         -- pyright = {},
-        -- rust_analyzer = {},
+        rust_analyzer = {},
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
         --    https://github.com/pmizio/typescript-tools.nvim
@@ -804,6 +814,7 @@ require('lazy').setup({
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
     'folke/tokyonight.nvim',
+    --'Mofiqul/dracula.nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
       ---@diagnostic disable-next-line: missing-fields
@@ -815,8 +826,11 @@ require('lazy').setup({
 
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.cmd.colorscheme 'tokyonight-night'
+      -- vim.cmd.colorscheme 'dracula'
+
+      -- You can configure highlights by doing something like:
+      -- vim.cmd.hi 'Comment gui=none'
     end,
   },
 
@@ -875,7 +889,7 @@ require('lazy').setup({
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
     config = function()
       -- ensure basic parser are installed
-      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'rust' }
       require('nvim-treesitter').install(parsers)
 
       ---@param buf integer
@@ -970,3 +984,50 @@ require('lazy').setup({
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+local keymap = function(mode, lhs, rhs) vim.keymap.set(mode, lhs, rhs, { noremap = true, silent = true }) end
+
+local n_keymap = function(lhs, rhs) keymap('n', lhs, rhs) end
+
+local i_keymap = function(lhs, rhs) keymap('i', lhs, rhs) end
+
+local v_keymap = function(lhs, rhs) keymap('v', lhs, rhs) end
+
+n_keymap('<A-j>', ':m .+1<CR>==')
+n_keymap('<A-k>', ':m .-2<CR>==')
+i_keymap('<A-j>', '<Esc>:m .+1<CR>==gi')
+i_keymap('<A-k>', '<Esc>:m .-2<CR>==gi')
+v_keymap('<A-j>', ":m '>+1<CR>gv=gv")
+v_keymap('<A-k>', ":m '<-2<CR>gv=gv")
+
+n_keymap('<A-l>', '>>')
+v_keymap('<A-l>', '>gv')
+i_keymap('<A-l>', '<C-T>')
+v_keymap('<Tab>', '>gv')
+
+n_keymap('<A-h>', '<<')
+v_keymap('<A-h>', '<gv')
+i_keymap('<A-h>', '<C-D>')
+n_keymap('<S-Tab>', '<<')
+v_keymap('<S-Tab>', '<gv')
+i_keymap('<S-Tab>', '<C-D>')
+
+n_keymap('0', '^')
+v_keymap('0', '^')
+
+n_keymap('<S-p>', 'o<Esc>p')
+i_keymap('jj', '<Esc>')
+
+vim.g.EasyMotion_smartcase = 1
+n_keymap('<leader>j', '<Plug>(easymotion-s2)')
+
+n_keymap('<C-j>', '<C-d>zz')
+n_keymap('<C-k>', '<C-u>zz')
+
+-- Backround Transparent
+-- https://blog.chaitanyashahare.com/posts/how-to-make-nvim-backround-transparent/j
+vim.cmd [[
+  highlight Normal guibg=none
+  highlight NonText guibg=none
+  highlight Normal ctermbg=none
+  highlight NonText ctermbg=none
+]]
