@@ -1,4 +1,5 @@
 --[[
+--
 
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
@@ -670,8 +671,24 @@ require('lazy').setup({
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+      local arduino_config = require('lspconfig.server_configurations.arduino_language_server').default_config
+      arduino_config.cmd = {
+        'arduino-language-server',
+        '-clangd',
+        'clangd',
+        '-cli',
+        '/home/toni/bin/arduino-cli',
+        '-cli-config',
+        '/home/toni/.arduino15/arduino-cli.yaml',
+        '-fqbn',
+        'arduino:avr:uno',
+        '-log',
+        '-logpath',
+        '/home/toni/arduino-logs/',
+      }
       local servers = {
         -- clangd = {},
+        arduino_language_server = arduino_config,
         -- gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
@@ -1014,3 +1031,42 @@ require('lazy').setup({
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+local keymap = function(mode, lhs, rhs)
+  vim.keymap.set(mode, lhs, rhs, { noremap = true, silent = true })
+end
+
+local n_keymap = function(lhs, rhs)
+  keymap('n', lhs, rhs)
+end
+
+local i_keymap = function(lhs, rhs)
+  keymap('i', lhs, rhs)
+end
+
+local v_keymap = function(lhs, rhs)
+  keymap('v', lhs, rhs)
+end
+
+n_keymap('<A-j>', ':m .+1<CR>==')
+n_keymap('<A-k>', ':m .-2<CR>==')
+i_keymap('<A-j>', '<Esc>:m .+1<CR>==gi')
+i_keymap('<A-k>', '<Esc>:m .-2<CR>==gi')
+v_keymap('<A-j>', ":m '>+1<CR>gv=gv")
+v_keymap('<A-k>', ":m '<-2<CR>gv=gv")
+
+n_keymap('<A-l>', '>>')
+v_keymap('<A-l>', '>gv')
+i_keymap('<A-l>', '<C-T>')
+v_keymap('<Tab>', '>gv')
+
+n_keymap('<A-h>', '<<')
+v_keymap('<A-h>', '<gv')
+i_keymap('<A-h>', '<C-D>')
+n_keymap('<S-Tab>', '<<')
+v_keymap('<S-Tab>', '<gv')
+i_keymap('<S-Tab>', '<C-D>')
+
+n_keymap('0', '^')
+v_keymap('0', '^')
+
+n_keymap('<S-p>', 'o<Esc>p')
