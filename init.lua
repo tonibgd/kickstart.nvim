@@ -249,6 +249,16 @@ rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
+  'easymotion/vim-easymotion',
+  'mfussenegger/nvim-dap',
+  -- rust
+  'simrat39/rust-tools.nvim',
+  {
+    'rust-lang/rust.vim',
+    config = function()
+      vim.g.rustfmt_autosave = 1
+    end,
+  },
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -671,7 +681,7 @@ require('lazy').setup({
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
-      local arduino_config = require('lspconfig.server_configurations.arduino_language_server').default_config
+      local arduino_config = require('lspconfig.configs.arduino_language_server').default_config
       arduino_config.cmd = {
         'arduino-language-server',
         '-clangd',
@@ -898,7 +908,8 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
+    --'folke/tokyonight.nvim',
+    'Mofiqul/dracula.nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
       ---@diagnostic disable-next-line: missing-fields
@@ -911,7 +922,11 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      --vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd.colorscheme 'dracula'
+
+      -- You can configure highlights by doing something like:
+      vim.cmd.hi 'Comment gui=none'
     end,
   },
 
@@ -961,7 +976,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'rust' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -1070,3 +1085,10 @@ n_keymap('0', '^')
 v_keymap('0', '^')
 
 n_keymap('<S-p>', 'o<Esc>p')
+i_keymap('jj', '<Esc>')
+
+vim.g.EasyMotion_smartcase = 1
+n_keymap('<leader>j', '<Plug>(easymotion-s2)')
+
+n_keymap('<C-j>', '<C-d>zz')
+n_keymap('<C-k>', '<C-u>zz')
